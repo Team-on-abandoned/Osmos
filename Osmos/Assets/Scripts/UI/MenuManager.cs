@@ -36,11 +36,13 @@ public class MenuManager : MonoBehaviour {
 		}
 
 		if(menu != null) {
-			if (currMenu.Count > 0 && hidePrev) 
-				currMenu.Pop().Hide(false);
+			if(currMenu.Count == 0 || currMenu.Peek() != menu) {
+				if (currMenu.Count > 0 && hidePrev)
+					currMenu.Pop().Hide(false);
 
-			currMenu.Push(menu);
-			time = menu.Show(false);
+				currMenu.Push(menu);
+				time = menu.Show(false);
+			}
 		}
 		else {
 			Debug.LogError($"Cant find menu with name {menuName}");
@@ -50,15 +52,19 @@ public class MenuManager : MonoBehaviour {
 	}
 
 	public float Show(MenuBase menu, bool hidePrev = true) {
-		if (hidePrev && currMenu.Count > 0) 
-			currMenu.Pop().Hide(false);
+		if (currMenu.Count == 0 || currMenu.Peek() != menu) {
+			if (hidePrev && currMenu.Count > 0)
+				currMenu.Pop().Hide(false);
 
-		currMenu.Push(menu);
-		return menu.Show(false);
+			currMenu.Push(menu);
+			return menu.Show(false);
+		}
+		return 0f;
 	}
 
 	public void HideTopMenu(bool isForce = false) {
-		currMenu.Pop().Hide(isForce);
+		if (currMenu.Count != 0)
+			currMenu.Pop().Hide(isForce);
 	}
 
 	public void HideAll() {

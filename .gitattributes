@@ -55,7 +55,7 @@
 *.mp3                binary
 *.ogg                binary
 *.s3m                binary
-*.wav                binary
+*.wav filter=lfs diff=lfs merge=lfs -text
 *.xm                 binary
 # Video
 *.asf filter=lfs diff=lfs merge=lfs -text

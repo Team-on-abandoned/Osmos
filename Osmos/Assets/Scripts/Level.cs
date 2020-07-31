@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 
 using Random = UnityEngine.Random;
+using UnityEditor;
 
 public class Level : MonoBehaviour {
 	static new Camera camera = null;
@@ -71,8 +72,8 @@ public class Level : MonoBehaviour {
 		}
 
 		--remaingLoads;
-		if (remaingLoads == 0)
-			StartGame();
+		if(remaingLoads == 0)
+			menuManager.Show("MainMenuScreen");
 	}
 
 	Vector2 GetRandomSpawnPoint() {

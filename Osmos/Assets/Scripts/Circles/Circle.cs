@@ -22,6 +22,9 @@ public class Circle : MonoBehaviour {
 	[SerializeField] [Tag] string enemyTag = "Circle";
 	[SerializeField] float growTime = 0.5f;
 
+	[Header("Audio")] [Space]
+	[SerializeField] AudioClip eatClip = null;
+
 	[Header("Refs")] [Space]
 	public new CircleCollider2D collider = null;  //new keyword required, cuz collider already exist in MonoBehaviour, but marked obsolete
 	[SerializeField] SpriteRenderer sr = null;
@@ -60,12 +63,16 @@ public class Circle : MonoBehaviour {
 			Circle other = collision.gameObject.GetComponent<Circle>();
 			if(other.Radius < Radius) {
 				DesiredRadius = Mathf.Sqrt((DesiredRadius * DesiredRadius + other.Radius * other.Radius));
+				sr.sortingOrder = Mathf.RoundToInt(DesiredRadius * 100);
 
 				other.Die();
 				other.transform.SetParent(transform);
 				LeanTween.moveLocal(other.gameObject, Vector3.zero, growTime * 0.9f);
 				LeanTween.scale(other.gameObject, Vector3.zero, growTime * 0.9f);
 				Destroy(other.gameObject, growTime);
+
+				if(eatClip != null)
+					AudioManager.Instance.Play(eatClip, channel: AudioManager.AudioChannel.Sound);
 
 				LeanTween.value(gameObject, Radius, DesiredRadius, growTime)
 				.setOnUpdate((float r) => {
@@ -78,6 +85,7 @@ public class Circle : MonoBehaviour {
 
 	public void Init() {
 		DesiredRadius = Radius;
+		sr.sortingOrder = Mathf.RoundToInt(DesiredRadius * 100);
 	}
 
 	public void AddForce(Vector2 _force) {

@@ -16,7 +16,8 @@ public class MenuBase : MonoBehaviour {
 
 	internal virtual float Show(bool isForce) {
 		gameObject.SetActive(true);
-		
+		LeanTween.cancel(gameObject, false);
+
 		if (isForce) 
 			canvasGroup.alpha = 1.0f;
 		else 
@@ -26,6 +27,8 @@ public class MenuBase : MonoBehaviour {
 	}
 
 	internal virtual float Hide(bool isForce) {
+		LeanTween.cancel(gameObject, false);
+
 		if (isForce) {
 			canvasGroup.alpha = 0.0f;
 			gameObject.SetActive(false);

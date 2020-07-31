@@ -6,7 +6,9 @@ using yaSingleton;
 
 //TODO: add audio source pooling 
 [CreateAssetMenu(fileName = "Audio Manager", menuName = "Singletons/AudioManager")]
-public class AudioManager : Singleton<AudioManager> {
+public class AudioManager : MonoBehaviour{
+	public static AudioManager Instance = null;
+
 	public enum AudioChannel : byte { Master, Music, Sound, LastChannel }
 
 	const string SAVE_KEY_MASTER = "AudioManager.MasterVolume";
@@ -46,20 +48,13 @@ public class AudioManager : Singleton<AudioManager> {
 	public float defaultSoundVolume = 1;
 	public bool defaultEnabled = true;
 
-	protected override void Initialize() {
-		base.Initialize();
+	protected void Awake() {
+		IsEnabled = true;// PlayerPrefsX.GetBool(SAVE_KEY_ENABLED, defaultEnabled);
+		SetVolume(AudioChannel.Master, PlayerPrefs.GetFloat(SAVE_KEY_MASTER, defaultMasterVolume));
+		SetVolume(AudioChannel.Music, PlayerPrefs.GetFloat(SAVE_KEY_MUSIC, defaultMusicVolume));
+		SetVolume(AudioChannel.Sound, PlayerPrefs.GetFloat(SAVE_KEY_SOUND, defaultSoundVolume));
 
-		SceneManager.sceneLoaded += InitAfterLoad;
-
-		void InitAfterLoad(Scene c, LoadSceneMode mode) {
-			SceneManager.sceneLoaded -= InitAfterLoad;
-			LeanTween.delayedCall(0.1f, () => {
-				IsEnabled = true;// PlayerPrefsX.GetBool(SAVE_KEY_ENABLED, defaultEnabled);
-				SetVolume(AudioChannel.Master, PlayerPrefs.GetFloat(SAVE_KEY_MASTER, defaultMasterVolume));
-				SetVolume(AudioChannel.Music, PlayerPrefs.GetFloat(SAVE_KEY_MUSIC, defaultMusicVolume));
-				SetVolume(AudioChannel.Sound, PlayerPrefs.GetFloat(SAVE_KEY_SOUND, defaultSoundVolume));
-			});
-		}
+		Instance = this;
 	}
 
 	/// <param name="volume">[0..1]</param>
