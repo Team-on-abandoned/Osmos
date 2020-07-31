@@ -103,7 +103,7 @@ public class Circle : MonoBehaviour {
 		return go.CompareTag(enemyTag);
 	}
 
-	void Die() {
+	public void Die() {
 		IsDead = true;
 		rb.isKinematic = true;
 		rb.velocity = Vector2.zero;

@@ -20,6 +20,9 @@ public class Level : MonoBehaviour {
 	[SerializeField] GameObject enemyPrefab = null;
 	[SerializeField] GameObject playerPrefab = null;
 
+	[Header("Scene Refs")] [Space]
+	[SerializeField] MenuManager menuManager;
+
 	//Loaded data from Streaming Assets
 	int remaingLoads = 0;
 	LevelGeneratorData levelGeneratorData = null;
@@ -41,6 +44,7 @@ public class Level : MonoBehaviour {
 	}
 
 	public void StartGame() {
+		LeanTween.cancel(gameObject, false);
 		ClearLevel();
 		SpawnPlayer();
 		SpawnEnemies();
@@ -144,11 +148,13 @@ public class Level : MonoBehaviour {
 
 		if (maxEnemy == null || maxEnemy.DesiredRadius <= player.DesiredRadius) {
 			Debug.Log("Win game");
+			LeanTween.delayedCall(gameObject, menuManager.Show("WinScreen"), ClearLevel);
 		}
 	}
 
 	void OnPlayerDie(Circle c) {
 		Debug.Log("Lose game");
+		LeanTween.delayedCall(gameObject, menuManager.Show("LoseScreen"), ClearLevel);
 	}
 
 	void OnEnemyGrow(Circle c) {
