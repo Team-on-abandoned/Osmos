@@ -1,0 +1,6 @@
+{
+   "enemiesToSpawn": 15,
+   "enemyMinRadius": 0.1,
+   "enemyMaxRadius": 0.75,
+   "playerRadius": 0.5
+}

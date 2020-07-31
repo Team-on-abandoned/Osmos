@@ -48,9 +48,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db78e5c3abfa59241bae72d31d3c4903, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  collider: {fileID: 6498879794634368969}
   sr: {fileID: 6498879794634368966}
   rb: {fileID: 6498879794634368968}
-  collider: {fileID: 6498879794634368969}
 --- !u!114 &6498879794634368971
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -63,7 +63,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c44e6c7c675501940820d2c9229b6cf6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  forceOverDistance: 25
+  forceOverDistance: 0.42
   circle: {fileID: 6498879794634368970}
   rb: {fileID: 6498879794634368968}
   camera: {fileID: 0}
@@ -111,7 +111,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 1
-  m_Size: {x: 0.64, y: 0.64}
+  m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -128,8 +128,8 @@ Rigidbody2D:
   m_BodyType: 0
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 100
+  m_UseAutoMass: 1
+  m_Mass: 0.7853982
   m_LinearDrag: 0.42
   m_AngularDrag: 0
   m_GravityScale: 0
@@ -153,7 +153,7 @@ CircleCollider2D:
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
-  m_Radius: 0.32
+  m_Radius: 0.5
 --- !u!114 &1152377173
 MonoBehaviour:
   m_ObjectHideFlags: 0

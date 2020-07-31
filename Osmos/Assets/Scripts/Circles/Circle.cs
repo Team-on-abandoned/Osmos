@@ -3,10 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Circle : MonoBehaviour {
+	public float Radius {
+		get => collider.radius;
+		set {
+			collider.radius = value;
+			sr.size = new Vector2(collider.radius * 2, collider.radius * 2);
+		}
+	}
+
 	[Header("Refs")] [Space]
+	public new CircleCollider2D collider = null;  //new keyword required, cuz collider already exist in MonoBehaviour, but marked obsolete
 	[SerializeField] SpriteRenderer sr = null;
 	[SerializeField] Rigidbody2D rb = null;
-	[SerializeField] new CircleCollider2D collider = null;  //new keyword required, cuz collider already exist in MonoBehaviour, but marked obsolete
 
 	Vector2 force = Vector2.zero;
 
@@ -37,5 +45,9 @@ public class Circle : MonoBehaviour {
 
 	public void AddForce(Vector2 _force) {
 		force += _force;
+	}
+
+	public void SetColor(Color color) {
+		sr.color = color;
 	}
 }
