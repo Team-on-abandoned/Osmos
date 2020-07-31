@@ -14,9 +14,10 @@ GameObject:
   - component: {fileID: 5714131202959349230}
   - component: {fileID: 5714131202959349229}
   - component: {fileID: 5714131202959349228}
+  - component: {fileID: 278687933761681677}
   m_Layer: 0
   m_Name: EnemyCircle
-  m_TagString: Enemy
+  m_TagString: Circle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -47,6 +48,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db78e5c3abfa59241bae72d31d3c4903, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enemyTag: Circle
+  growTime: 1
   collider: {fileID: 5714131202959349228}
   sr: {fileID: 5714131202959349230}
   rb: {fileID: 5714131202959349229}

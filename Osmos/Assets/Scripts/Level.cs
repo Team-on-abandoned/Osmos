@@ -27,6 +27,7 @@ public class Level : MonoBehaviour {
 
 	Circle player = null;
 	List<Circle> enemies = null;
+	Circle minEnemy, maxEnemy;
 
 	private void Awake() {
 		if (camera == null)
@@ -40,71 +41,12 @@ public class Level : MonoBehaviour {
 	}
 
 	public void StartGame() {
-		//Can be rewritten with pooling instead of respawning
-		if (player != null)
-			Destroy(player.gameObject);
-		foreach (var _enemy in enemies)
-			if (_enemy != null)
-				Destroy(_enemy.gameObject);
-		enemies.Clear();
+		ClearLevel();
+		SpawnPlayer();
+		SpawnEnemies();
 
-		player = Instantiate(playerPrefab, transform.position, Quaternion.identity, transform).GetComponent<Circle>();
-		player.Radius = levelGeneratorData.playerRadius;
-		player.SetColor(colorData.playerColor);
-
-		Circle enemy;
-		ContactFilter2D contactFilter = new ContactFilter2D() { };
-		List<Collider2D> results = new List<Collider2D>(4);
-		int tries;
-		const int maxTries = 50;
-
-		for (int i = 0; i < levelGeneratorData.enemiesToSpawn; ++i) {
-			tries = 0;
-			enemy = Instantiate(enemyPrefab, GetRandomSpawnPoint(), Quaternion.identity, transform).GetComponent<Circle>();
-			enemy.name = $"{enemyPrefab.name} - {i}";
-
-			if(i == 0)
-				enemy.Radius = levelGeneratorData.enemyMaxRadius;   //Just to be sure, that there are at least 1 enemy bigger than player
-			else
-				enemy.Radius = Random.Range(levelGeneratorData.enemyMinRadius, levelGeneratorData.enemyMaxRadius);
-
-			//For proper OverlapCollider work I enable Auto Sync Transforms, which is bad for performance	
-			//Can be rewritten with (x – h)2 + (y – k)2 = r2
-			while (enemy.collider.OverlapCollider(contactFilter, results) != 0 && tries++ <= maxTries) {
-				enemy.transform.position = GetRandomSpawnPoint();
-			}
-
-			if(tries > maxTries) {
-				Destroy(enemy.gameObject);
-				Debug.Log($"No free space for enemy {enemy.name}. Skipping it");	
-			}
-			else {
-				enemies.Add(enemy);
-			}
-
-
-		}
-
-		//Move it on player grow event
-		float minEnemySize = enemies[0].Radius;
-		float maxEnemySize = enemies[0].Radius;
-
-		foreach (var enemy1 in enemies) {
-			if (minEnemySize > enemy1.Radius)
-				minEnemySize = enemy1.Radius;
-			if (maxEnemySize < enemy1.Radius)
-				maxEnemySize = enemy1.Radius;
-		}
-
-		foreach (var enemy1 in enemies) {
-			if (enemy1.Radius < player.Radius)
-				enemy1.SetColor(Color.Lerp(colorData.enemyColor1, colorData.enemyColor2, (enemy1.Radius - minEnemySize) / player.Radius / 2));
-			else
-				enemy1.SetColor(Color.Lerp(colorData.enemyColor1, colorData.enemyColor2, enemy1.Radius / maxEnemySize / 2 + 0.5f));
-		}
-		
-
-		Debug.Log($"Spawn {enemies.Count} enemies from {enemies.Capacity} desired");
+		RecalEnemySizes();
+		RepaintEnemies(true);
 	}
 
 	IEnumerator LoadDataFromStreamingAssets<T>(string fileName, Action<T> onEndLoad) {
@@ -133,5 +75,125 @@ public class Level : MonoBehaviour {
 		Vector3 pos = camera.ViewportToWorldPoint(new Vector2(Random.Range(0.05f, 0.95f), Random.Range(0.05f, 0.95f)));
 		pos.z = 0.0f;
 		return pos;
+	}
+
+	void ClearLevel() {
+		//Can be rewritten with pooling instead of respawning
+		if (player != null)
+			Destroy(player.gameObject);
+		foreach (var _enemy in enemies)
+			if (_enemy != null)
+				Destroy(_enemy.gameObject);
+		enemies.Clear();
+	}
+
+	void SpawnPlayer() {
+		player = Instantiate(playerPrefab, transform.position, Quaternion.identity, transform).GetComponent<Circle>();
+		player.Radius = levelGeneratorData.playerRadius;
+		player.SetColor(colorData.playerColor, true);
+		player.Init();
+
+		player.onGrowAction += OnPlayerGrow;
+		player.onDieAction += OnPlayerDie;
+	}
+
+	void SpawnEnemies() {
+		Circle enemy;
+		ContactFilter2D contactFilter = new ContactFilter2D() { };
+		List<Collider2D> results = new List<Collider2D>(4);
+		int tries;
+		const int maxTries = 50;
+
+		for (int i = 0; i < levelGeneratorData.enemiesToSpawn; ++i) {
+			tries = 0;
+			enemy = Instantiate(enemyPrefab, GetRandomSpawnPoint(), Quaternion.identity, transform).GetComponent<Circle>();
+			enemy.name = $"{enemyPrefab.name} - {i}";
+			enemy.Radius = levelGeneratorData.enemyMaxRadius * 1.2f;	//Temp radius, to spawn enemies away from each other
+
+			//For proper OverlapCollider work I enable Auto Sync Transforms, which is bad for performance	
+			//Can be rewritten with (x – h)2 + (y – k)2 = r2
+			while (enemy.collider.OverlapCollider(contactFilter, results) != 0 && (player.transform.position - enemy.transform.position).sqrMagnitude <= 6.25f && tries++ <= maxTries) {
+				enemy.transform.position = GetRandomSpawnPoint();
+			}
+
+			if (tries > maxTries) {
+				Destroy(enemy.gameObject);
+				Debug.Log($"No free space for enemy {enemy.name}. Skipping it");
+			}
+			else {
+				enemy.onGrowAction += OnEnemyGrow;
+				enemy.onDieAction += OnEnemyDie;
+
+				enemies.Add(enemy);
+			}
+		}
+
+		for (int i = 0; i < enemies.Count; ++i) {
+			if (i == 0)
+				enemies[i].Radius = levelGeneratorData.enemyMaxRadius;   //Just to be sure, that there are at least 1 enemy bigger than player
+			else
+				enemies[i].Radius = Random.Range(levelGeneratorData.enemyMinRadius, levelGeneratorData.enemyMaxRadius);
+			enemies[i].Init();
+		}
+
+		Debug.Log($"Spawn {enemies.Count} enemies from {enemies.Capacity} desired");
+	}
+
+	void OnPlayerGrow(Circle c) {
+		RepaintEnemies(false);
+
+		if (maxEnemy == null || maxEnemy.DesiredRadius <= player.DesiredRadius) {
+			Debug.Log("Win game");
+		}
+	}
+
+	void OnPlayerDie(Circle c) {
+		Debug.Log("Lose game");
+	}
+
+	void OnEnemyGrow(Circle c) {
+		if(c == minEnemy || c == maxEnemy || c.DesiredRadius < minEnemy.DesiredRadius || c.DesiredRadius > maxEnemy.DesiredRadius) {
+			RecalEnemySizes();
+			RepaintEnemies(false);
+		}
+		else {
+			RepaintEnemy(c, false);
+		}
+	}
+
+	void OnEnemyDie(Circle c) {
+		enemies.Remove(c);
+
+		if(c == minEnemy || c == maxEnemy) {
+			RecalEnemySizes();
+			RepaintEnemies(false);
+		}
+	}
+
+	void RecalEnemySizes() {
+		if (enemies.Count != 0) {
+			minEnemy = enemies[0];
+			maxEnemy = enemies[0];
+
+			foreach (var enemy in enemies) {
+				if (minEnemy.DesiredRadius > enemy.DesiredRadius)
+					minEnemy = enemy;
+				if (maxEnemy.DesiredRadius < enemy.DesiredRadius)
+					maxEnemy = enemy;
+			}
+		}
+	}
+
+	void RepaintEnemies(bool isForce) {
+		foreach (var enemy in enemies) {
+			RepaintEnemy(enemy, isForce);
+		}
+	}
+
+	void RepaintEnemy(Circle enemy, bool isForce) {
+		if (enemy.DesiredRadius < player.DesiredRadius)
+			enemy.SetColor(Color.Lerp(colorData.enemyColor1, colorData.enemyColor2, (enemy.DesiredRadius - minEnemy.DesiredRadius) / player.DesiredRadius / 2), isForce);
+		else
+			enemy.SetColor(Color.Lerp(colorData.enemyColor1, colorData.enemyColor2, enemy.DesiredRadius / maxEnemy.DesiredRadius / 2 + 0.5f), isForce);
 	}
 }

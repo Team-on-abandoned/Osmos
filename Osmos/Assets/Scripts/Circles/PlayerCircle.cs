@@ -8,11 +8,12 @@ public class PlayerCircle : MonoBehaviour {
 
 	[Header("Balance")] [Space]
 	[SerializeField] float forceOverDistance = 10.0f;
+	[SerializeField] float forceOverMass = 0.5f;  //All circles slow down with radius increase, because of rigid body autosize. But I want to keep player faster than enemies)
 
 	[Header("Refs")] [Space]
 	[SerializeField] Circle circle = null;
 	[SerializeField] Rigidbody2D rb = null;
-	[SerializeField] new Camera camera = null; //new keyword required, cuz camera already exist in MonoBehaviour, but marked obsolete
+	new Camera camera = null; //new keyword required, cuz camera already exist in MonoBehaviour, but marked obsolete
 
 	bool isPointerDown = false;
 	Vector2 lastCursorScreenPos = Vector2.zero;
@@ -25,12 +26,17 @@ public class PlayerCircle : MonoBehaviour {
 			circle = GetComponent<Circle>();
 		if (rb == null)
 			rb = GetComponent<Rigidbody2D>();
-		if (camera == null)
-			camera = Camera.main;
 	}
 #endif
 
+	private void Start() {
+		camera = Camera.main;
+	}
+
 	private void Update() {
+		if (circle.IsDead)
+			return;
+
 		lastCursorWorldPosRelative = (Vector2)transform.position - lastCursorWorldPos;
 
 #if UNITY_EDITOR
@@ -38,18 +44,22 @@ public class PlayerCircle : MonoBehaviour {
 			return;
 		Debug.DrawLine(transform.position, lastCursorWorldPos, Color.yellow);
 		Debug.DrawRay(transform.position, lastCursorWorldPosRelative, Color.yellow);
-		Debug.DrawRay(transform.position, lastCursorWorldPosRelative * forceOverDistance / rb.mass + rb.velocity, newVelocityColor);
+		Debug.DrawRay(transform.position, GetForce() / rb.mass + rb.velocity, newVelocityColor);
 #endif
 	}
 
 	public void OnPointerMove(InputAction.CallbackContext context) {
-		if (!isPointerDown)
+		if (!isPointerDown || circle.IsDead)
 			return;
+
 		lastCursorScreenPos = context.ReadValue<Vector2>();
 		lastCursorWorldPos = camera.ScreenToWorldPoint(lastCursorScreenPos);
 	}
 
 	public void OnPointerPress(InputAction.CallbackContext context) {
+		if (circle.IsDead)
+			return;
+
 		switch (context.phase) {
 			case InputActionPhase.Started:
 				isPointerDown = true;
@@ -57,9 +67,13 @@ public class PlayerCircle : MonoBehaviour {
 
 			case InputActionPhase.Canceled:
 				isPointerDown = false;
-				circle.AddForce(lastCursorWorldPosRelative * forceOverDistance);
+				circle.AddForce(GetForce());
 				lastCursorWorldPosRelative = lastCursorWorldPos = lastCursorScreenPos = Vector2.zero;
 				break;
 		}
+	}
+
+	Vector2 GetForce() {
+		return lastCursorWorldPosRelative * (forceOverDistance + forceOverMass * rb.mass);
 	}
 }
