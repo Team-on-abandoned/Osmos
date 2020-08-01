@@ -1,39 +1,36 @@
-# Unity Game Template (On active development. Use on your own risk)
-**Game Template** is all necessary stuff taken care for Unity users not to worry about creating most boring and tedious work.  
-I'd be happy for any contribution to make this template as good as it can be.  
+# Osmos
+2D physics game
 
-## Used assets/tools:
- Some assets was reworked, see changelog in Assets\Thirdparty\CustomChanges.md  
- https://github.com/Team-on/CustomToolbar  
- http://wiki.unity3d.com/index.php/ArrayPrefs2  
- https://assetstore.unity.com/packages/essentials/beta-projects/textmesh-pro-84126  
- https://assetstore.unity.com/packages/tools/animation/leantween-3595  
- https://assetstore.unity.com/packages/2d/gui/icons/simple-ui-elements-53276  
- https://assetstore.unity.com/packages/tools/gui/ui-tools-for-unity-124299  
- https://archive.codeplex.com/?p=DotNetZip  
- https://itch.io/docs/butler/  
- https://github.com/Team-on/unity-editor-spotlight  
- https://github.com/yasirkula/UnityIngameDebugConsole  
- https://github.com/2irate2migrate/HierarchyHighlighter  
- https://github.com/dbrizov/NaughtyAttributes/  
- https://github.com/jedybg/yaSingleton  
- https://nvjob.itch.io/fps-counter-and-graph  
- https://github.com/ogxd/project-curator  
- https://seansleblanc.itch.io/better-minimal-webgl-template  
- https://github.com/agens-no/PolyglotUnity  
- https://github.com/Konash/arabic-support-unity  
- https://assetstore.unity.com/packages/tools/playersprefs-editor-and-utilities-26656  
- https://github.com/Maligan/unity-subassets-drag-and-drop  
- https://github.com/s-m-k/Unity-Animation-Hierarchy-Editor  
- https://github.com/DapperDino/Dapper-Tools  
- https://github.com/rfadeev/pump-editor  
- https://github.com/PhannGor/unity3d-rainbow-folders  
- https://github.com/rfadeev/presets-browser  
- https://github.com/rfadeev/unity-forge-extension-methods  
- https://github.com/rfadeev/unity-forge-property-drawers  
+---------
 
- ## Want to use: 
- https://assetstore.unity.com/packages/tools/gui/cyro-build-debugger-65101  
- https://assetstore.unity.com/packages/tools/gui/debuggui-graph-139275  
-   
-Check out [wiki](https://github.com/Team-on/UnityGameTemplate/wiki) for additional information
+На сцене расположено множество свободно перемещающихся шаровидных объектов. При соприкосновении больший объект поглощает меньший и увеличивается на площадь поглощенного объекта.
+Игрок управляет одним из объектов и его задача - поглотить столько “конкурентов”, чтобы площадь оставшихся была меньше его собственной (т.е., не было возможности проиграть).
+Относитесь к тестовому как к большому проект который вы планируете разрабатывать и развивать несколько лет. Отнеситесь серьезно к построению как структуры кода так и стуркуры проекта
+
+---------
+
+1) Шар перемещается в сторону по вектору от клика до центра объекта *(Можно включить гизмо в редакторе, и будет видно вектора движения и прицела)*
+2) Скорость (приложенная сила) перемещения зависит от протяженности клика. Объект движется по инерции с учетом силы сопротивления пространства.
+3) Цвет “конкурентов” зависит от отношения его размера к размеру пользовательского объекта.
+4) Цвет пользовательского объекта, а также границы цвета “конкурентов” задаются внешним подгружаемым конфигом вида *(Лежит в StreamingAssets)*
+5) При столкновениях объектов с границами сцены - объекты отталкиваются
+6) Количество генерируемых “конкурентов” должно быть параметризировано внешним конфигом. При генерации объекты не должны пересекаться *(Тоже в StreamingAssets)*
+7) При победе или поражении должна выводиться соответствующая надпись.
+8) Должна быть возможность начать игру сначала не закрывая приложение
+
+---------
+
+Прочие условия:
+* Чем мягче будут проделаны трансформации объектов, тем лучше, можно использовать iTween. *(Использовал LeanTween как более быстрое решение)*
+* Мир помещается в 1 экран, границы мира это границы экрана, можно использовать ортогональную камеру. *(Граница мира подстраиваеться под вьюпорт, но только при старте)*
+* Можно подключить звуковые эффекты.
+* Игра должна работать под любым разрешением.
+* Игра должна работать на мобильном устройстве, если такого под рукой нет, то хотябы пишите код, ориентируясь на несколько платформ. *(Под рукой нет андроида, но уверен, что работает)*
+* Внимательно следите за фпс, сделать максимально оптимально.
+* Вообще, следите за тем, чтобы на выходе было что-то, в чем можно разглядеть работу программиста игр.
+
+---------
+
+![Screenshot1](Screenshots/1.jpg)  
+![Screenshot2](Screenshots/2.jpg)  
+![Screenshot3](Screenshots/3.jpg)  
