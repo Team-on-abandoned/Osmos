@@ -2,7 +2,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Audio;
-using yaSingleton;
 
 //TODO: add audio source pooling 
 [CreateAssetMenu(fileName = "Audio Manager", menuName = "Singletons/AudioManager")]
